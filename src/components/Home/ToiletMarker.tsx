@@ -20,7 +20,7 @@ const ToiletMarker = ({ info }: IToiletMarkerProps) => {
         : locationPin_normal;
   const size =
     selectedToiletInfo && selectedToiletInfo.id === info.id ? 40 : 25;
-
+console.log('test');
   return (
     <MapMarker
       image={{
