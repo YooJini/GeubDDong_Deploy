@@ -50,7 +50,7 @@ const useMapInfo = () => {
 
     const getCurrentLocationOption = {
       enableHighAccuracy: true,
-      maximumAge: Infinity,
+      maximumAge: 30000,
       timeout: 5000,
     };
 
