@@ -49,9 +49,9 @@ const useMapInfo = () => {
     };
 
     const getCurrentLocationOption = {
-      enableHighAccuracy: false,
-      // maximumAge: Infinity,
-      timeout: 3000,
+      enableHighAccuracy: true,
+      maximumAge: Infinity,
+      timeout: 5000,
     };
 
     if (navigator.geolocation) {
