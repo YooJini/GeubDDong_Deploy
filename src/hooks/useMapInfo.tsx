@@ -49,7 +49,8 @@ const useMapInfo = () => {
     };
 
     const getCurrentLocationOption = {
-      enableHighAccuracy: true,
+      enableHighAccuracy: false,
+      maximumAge: Infinity,
       timeout: 3000,
     };
 
