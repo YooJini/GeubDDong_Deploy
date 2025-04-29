@@ -5,27 +5,10 @@ export interface ICoordinate {
   longitude: number | null;
 }
 
-export type TAvailable = 'Y' | 'N';
-
-export interface IToiletInfo {
-  id: number;
-  name: string;
-  latitude: number;
-  longitude: number;
-  street_address: string;
-  lot_address: string;
-  open_hour: string;
-}
-
 export interface IUserInfo {
   email: string;
   nickname: string;
   profileImage: string;
-}
-
-export interface ILike {
-  like: boolean;
-  count: number;
 }
 
 export interface IBound {
@@ -42,4 +25,12 @@ export type TFilterKey = keyof typeof FILTER_KEY;
 export interface IFilterItem {
   label: string;
   query: string;
+}
+
+export type TTabType = 'likeList' | 'reviewList';
+
+export interface IRatingItem {
+  cleanliness: number;
+  amenities: number;
+  accessibility: number;
 }

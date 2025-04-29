@@ -3,18 +3,66 @@ import styled from 'styled-components';
 import CommentItem from './CommentItem';
 import useComments from '@/hooks/useComments';
 import useSelectedInfo from '@/hooks/useSelectedInfo';
+import { FaPencilAlt } from 'react-icons/fa';
+import CommentModal from './CommentModal';
+import { overlay } from 'overlay-kit';
+import useAuth from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
+import useDetailInfo from '@/hooks/useDetailInfo';
+import { ICommentActionModel } from '@/models/comment.model';
 
 const Comments = () => {
   const { selectedToilet } = useSelectedInfo();
-  const { comments, updateComment, removeComment, isLoading } = useComments(
-    selectedToilet?.id,
+  const { detailInfo, setDetailInfo } = useDetailInfo(
+    selectedToilet || undefined,
   );
+  const updateRating = (rating: ICommentActionModel) => {
+    if (detailInfo) {
+      setDetailInfo({
+        ...detailInfo,
+        rating: rating.avgRating,
+        ratingItems: {
+          cleanliness: rating.ratingItems.cleanliness,
+          amenities: rating.ratingItems.amenities,
+          accessibility: rating.ratingItems.accessibility,
+        },
+      });
+    }
+  };
+
+  const { comments, addComment, updateComment, removeComment, isLoading } =
+    useComments(selectedToilet || undefined, updateRating);
+  const { isLogin } = useAuth();
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (!isLogin) {
+      navigate('/login');
+      return;
+    }
+
+    overlay.open(({ isOpen, unmount }) => {
+      return (
+        <CommentModal
+          isOpen={isOpen}
+          onExit={unmount}
+          addComment={addComment}
+        />
+      );
+    });
+  };
 
   return (
     <CommentsStyle>
-      <div className="title">
-        <span className="titleName">리뷰</span>
-        <span className="count">{`(${comments.length})`}</span>
+      <div className="top">
+        <div className="title">
+          <span className="titleName">리뷰</span>
+          <span className="count">{`(${comments.length})`}</span>
+        </div>
+        <div className="write" onClick={handleClick}>
+          <FaPencilAlt size={'0.9rem'} />
+          리뷰 작성하기
+        </div>
       </div>
       <div className="comments">
         {isLoading ? (
@@ -40,6 +88,14 @@ const CommentsStyle = styled.div`
   flex-direction: column;
   gap: 10px;
 
+  .top {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    font-size: ${Theme.fontSize.sm};
+    color: ${Theme.colors.mainText};
+  }
+
   .title {
     display: flex;
     gap: 3px;
@@ -58,10 +114,18 @@ const CommentsStyle = styled.div`
     }
   }
 
+  .write {
+    display: flex;
+    flex-direction: row;
+    gap: 2px;
+    cursor: pointer;
+    color: ${Theme.colors.mainText};
+  }
+
   .comments {
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 15px;
     margin-top: 10px;
   }
 `;

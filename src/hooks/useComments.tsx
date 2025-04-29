@@ -5,10 +5,19 @@ import {
   removeComment,
   updateComment,
 } from '@/api/detail.api';
-import { ICommentItem } from '@/models/comment.model';
+import {
+  CommentActionModel,
+  CommentModel,
+  ICommentActionModel,
+  ICommentModel,
+} from '@/models/comment.model';
+import { IRatingItem } from '@/types';
 
-const useComments = (toiletId: number | undefined) => {
-  const [comments, setComments] = useState<ICommentItem[]>([]);
+const useComments = (
+  toiletId: number | undefined,
+  updateRating: (rating: ICommentActionModel) => void,
+) => {
+  const [comments, setComments] = useState<ICommentModel[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const loadComments = async () => {
@@ -18,7 +27,9 @@ const useComments = (toiletId: number | undefined) => {
     try {
       const res = await fetchComments(toiletId);
       if ('comments' in res) {
-        setComments(res.comments.reverse());
+        setComments(new CommentModel(res).comments);
+      } else {
+        setComments([]);
       }
     } catch (error) {
       // TODO: 에러처리
@@ -28,24 +39,30 @@ const useComments = (toiletId: number | undefined) => {
     }
   };
 
-  const handleAddComment = async (comment: string) => {
+  const handleAddComment = async (comment: string, ratings: IRatingItem) => {
     if (!toiletId) return;
 
     try {
-      await addComment(toiletId, { comment });
+      const res = await addComment(toiletId, comment, ratings);
       await loadComments();
+      updateRating(new CommentActionModel(res).rating);
     } catch (error) {
       // TODO: 에러 처리
       console.log(error);
     }
   };
 
-  const handleUpdateComment = async (id: number, comment: string) => {
+  const handleUpdateComment = async (
+    id: number,
+    comment: string,
+    ratings: IRatingItem,
+  ) => {
     if (!toiletId) return;
 
     try {
-      await updateComment(toiletId, { id, comment });
+      const res = await updateComment(toiletId, id, comment, ratings);
       await loadComments();
+      updateRating(new CommentActionModel(res).rating);
     } catch (error) {
       // TODO: 에러 처리
       console.log(error);
@@ -56,8 +73,9 @@ const useComments = (toiletId: number | undefined) => {
     if (!toiletId) return;
 
     try {
-      await removeComment(toiletId, id);
+      const res = await removeComment(toiletId, id);
       setComments((prev) => prev.filter((comment) => comment.id !== id));
+      updateRating(new CommentActionModel(res).rating);
     } catch (error) {
       // TODO: 에러 처리
       console.log(error);
@@ -66,7 +84,7 @@ const useComments = (toiletId: number | undefined) => {
 
   useEffect(() => {
     loadComments();
-  }, []);
+  }, [toiletId]);
 
   return {
     comments,

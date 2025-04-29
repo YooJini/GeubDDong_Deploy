@@ -1,16 +1,17 @@
 import requestHandler from '@/api/requestHandler';
-import { ICommentItem } from '@/models/comment.model';
-import { IToiletDetailInfo } from '@/models/detail.model';
 import { useAuthStore } from '@/store/authStore';
-import { ILike, IUserInfo } from '@/types';
+import {
+  ICommentActionResponse,
+  ICommentRequest,
+  ICommentsResponse,
+  ILikeResponse,
+  IToiletDetailResponse,
+} from './scheme';
+import { IRatingItem } from '@/types';
 
 export const fetchDetailInfo = async (id: number) => {
-  return requestHandler<IToiletDetailInfo>('get', `/detail/${id}`);
+  return requestHandler<IToiletDetailResponse>('get', `/detail/${id}`);
 };
-
-export interface CommentsResponse {
-  comments: ICommentItem[];
-}
 
 export interface NoCommentsResponse {
   message: string;
@@ -19,46 +20,67 @@ export interface NoCommentsResponse {
 export const fetchComments = async (id: number) => {
   const url = useAuthStore.getState().user ? '' : '/public';
 
-  return requestHandler<CommentsResponse | NoCommentsResponse>(
+  return requestHandler<ICommentsResponse | NoCommentsResponse>(
     'get',
     `/comments/${id}${url}`,
   );
 };
 
 export const addComment = async (
-  id: number,
-  data: Pick<ICommentItem, 'comment'>,
+  toiletId: number,
+  comment: string,
+  ratings: IRatingItem,
 ) => {
-  return requestHandler('post', `/comments/${id}`, data);
+  return requestHandler<
+    ICommentActionResponse,
+    Omit<ICommentRequest, 'commentId'>
+  >('post', `/comments/${toiletId}`, {
+    comment,
+    rating: {
+      cleanliness: ratings.cleanliness,
+      amenities: ratings.amenities,
+      accessibility: ratings.accessibility,
+    },
+  });
 };
 
 export const updateComment = async (
-  id: number,
-  comment: Pick<ICommentItem, 'id' | 'comment'>,
+  toiletId: number,
+  commentId: number,
+  comment: string,
+  ratings: IRatingItem,
 ) => {
-  return requestHandler('put', `/comments/${id}`, comment);
+  return requestHandler<ICommentActionResponse, ICommentRequest>(
+    'put',
+    `/comments/${toiletId}`,
+    {
+      commentId: commentId,
+      comment,
+      rating: {
+        cleanliness: ratings.cleanliness,
+        amenities: ratings.amenities,
+        accessibility: ratings.accessibility,
+      },
+    },
+  );
 };
 
 export const removeComment = async (toiletId: number, commentId: number) => {
-  return requestHandler('delete', `/comments/${toiletId}/${commentId}`);
+  return requestHandler<ICommentActionResponse>(
+    'delete',
+    `/comments/${toiletId}`,
+    { id: commentId },
+  );
 };
 
 export const fetchLike = async (id: number) => {
-  const url = useAuthStore.getState().user ? '' : '/public';
-
-  return requestHandler<ILike>('get', `/likes/${id}${url}`);
+  return requestHandler<ILikeResponse>('get', `/favorites/${id}`);
 };
 
-export const addLike = async (
-  id: number,
-  userEmail: Pick<IUserInfo, 'email'>,
-) => {
-  return requestHandler('post', `/likes/${id}`, userEmail);
+export const addLike = async (id: number) => {
+  return requestHandler('post', `/favorites/${id}`);
 };
 
-export const removeLike = async (
-  id: number,
-  userEmail: Pick<IUserInfo, 'email'>,
-) => {
-  return requestHandler('delete', `/likes/${id}`, userEmail);
+export const removeLike = async (id: number) => {
+  return requestHandler('delete', `/favorites/${id}`);
 };
