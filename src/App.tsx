@@ -1,12 +1,10 @@
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { GlobalStyle } from '@/style/GlobalStyle';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
 import { Bounce, ToastContainer } from 'react-toastify';
-import 'react-toastify/ReactToastify.css';
-import BottomTab from './components/Common/BottomTab';
-import routeElements from './routes';
 import useKakaoLoader from './hooks/useKakaoLoader';
 import { OverlayProvider } from 'overlay-kit';
+import RouterComponent from './RouterComponent';
 
 function App() {
   const { isKakaoLoaded } = useKakaoLoader();
@@ -18,22 +16,21 @@ function App() {
       <OverlayProvider />
       {isKakaoLoaded && (
         <Router>
-          <div style={{ height: 'calc(100% - 62px)' }}>
-            <Routes>
-              {routeElements.map(({ key, path, element }) => (
-                <Route key={key} path={path} element={element} />
-              ))}
-            </Routes>
-          </div>
-          <BottomTab />
+          <RouterComponent />
         </Router>
       )}
       <ToastContainer
-        position="top-center"
-        limit={1}
+        position="bottom-center"
+        limit={3}
         closeButton={false}
         autoClose={1000}
-        theme="colored"
+        toastStyle={{
+          backgroundColor: '#5e5e5e',
+          color: 'white',
+          borderRadius: '10px',
+          marginBottom: '70px',
+          maxWidth: '90%',
+        }}
         transition={Bounce}
         hideProgressBar
       />
